@@ -220,7 +220,7 @@ if menu_item == 'Home':
                                                  label_visibility='visible', 
                                                  type = ["mp3"], 
                                                  accept_multiple_files = True,
-                                                 help = "Retrieve Demo MP3 File [here](https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3)"
+                                                 help = "you can download a demo mp3 file by clicking [here](https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3)"
                                                  )
 
                 # Custom CSS Styling for st.file_uploader / hide standard text to make widget smaller
