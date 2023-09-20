@@ -209,8 +209,9 @@ if menu_item == 'Home':
                                                  label_visibility='hidden', 
                                                  type = ["mp3"], 
                                                  accept_multiple_files = True,
+                                                 help = "Retrieve Demo File from https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3"
                                                  )
-                
+
                 # Custom CSS Styling for st.file_uploader / hide standard text to make widget smaller
                 hide_label = """
                 <style>
@@ -467,7 +468,8 @@ if menu_item == 'Home':
                       FILE_URL,
                       config=config_summary
                     )
-                    print(transcript_summary.summary)
+                    
+                    #print(transcript_summary.summary)
                     
                     # save to session state
                     set_state("CLAUDIO", ("summary", transcript_summary.summary))                
@@ -778,17 +780,15 @@ if menu_item == 'Home':
                  		# Display Emotion Analysis in right-side column
                  		col3.write(f"{utterance_data['predicted_emoticon']}")
             
-# =============================================================================
-#             # =============================================================================
-#             # 2.SUMMARY
-#             # =============================================================================
-#             my_bar.progress(40, text = 'loading summary...')
-#             
-#             with st.expander('summary', expanded=True):
-#                 summary = get_state("CLAUDIO", "summary") # retrieve from session state the summary
-#                 st.write(summary[0]['summary_text']) # retrieve the text of summary             
-# =============================================================================
+            # =============================================================================
+            # 2.SUMMARY
+            # =============================================================================
+            my_bar.progress(40, text = 'loading summary...')
             
+            with st.expander('summary', expanded=True):
+                summary = get_state("CLAUDIO", "summary") # retrieve from session state the summary
+                st.write(summary) # retrieve the text of summary      
+                          
             # =============================================================================
             # 3.NER - NAMED ENTITY RECOGNITION
             # =============================================================================
