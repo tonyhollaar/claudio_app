@@ -4,7 +4,6 @@ streamlit_option_menu
 assemblyai
 textblob
 transformers
-torch
 fire_state
 pydub
 plotly
