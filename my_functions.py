@@ -57,7 +57,7 @@ def create_flipcard(image_path_front_card=None, image_path_back=None, font_size_
                 <h2>Key Features:</h2>
                 <ul>
                     <li><strong>Audio Upload:</strong> Users can upload audio files in MP3 format for transcription.</li>
-                    <li><strong>Transcription:</strong> The application sends the audio file to the AssemblyAI API for transcription, displaying the transcript in real-time.</li>
+                    <li><strong>Transcription:</strong> The application sends the audio file to the AssemblyAI API for transcription, displaying the transcript.</li>
                     <li><strong>Sentiment Analysis:</strong> Claudio provides sentiment analysis for the transcribed text, showing the emotional tone.</li>
                     <li><strong>Text Summarization:</strong> Users can generate a summary of the transcribed text, making it easier to grasp the content.</li>
                     <li><strong>Question and Answer:</strong> Users can ask questions about the transcribed text, and Claudio attempts to provide relevant answers.</li>

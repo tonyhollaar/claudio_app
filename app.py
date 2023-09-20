@@ -203,7 +203,7 @@ if menu_item == 'Home':
                     api_key_input = st.text_input("Enter :blue[**AssemblyAI**] API Key", 
                                                   key = key1_api_key, 
                                                   help = '''to obtain an api key, register at [https://www.assemblyai.com/](https://www.assemblyai.com/).   
-                                                  If run locally you can add in lowercase \'api_key = \'xxxxxxxxxxx\' to your secrets.toml, for more info click [here](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management).''', 
+                                                  if run locally you can add in lowercase \'api_key = \'xxxxxxxxxxx\' to your secrets.toml file, for more info click [here](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management).''', 
                                                   label_visibility = 'visible')                                     
                 else:
                     api_key_input = ''
@@ -217,10 +217,10 @@ if menu_item == 'Home':
                     """, unsafe_allow_html=True)
                 
                 uploaded_file = st.file_uploader(label = 'Upload Audio File', 
-                                                 label_visibility='hidden', 
+                                                 label_visibility='visible', 
                                                  type = ["mp3"], 
                                                  accept_multiple_files = True,
-                                                 help = "Retrieve Demo File from https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3"
+                                                 help = "Retrieve Demo MP3 File [here](https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3)"
                                                  )
 
                 # Custom CSS Styling for st.file_uploader / hide standard text to make widget smaller
