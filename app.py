@@ -194,7 +194,9 @@ if menu_item == 'Home':
             
             with col2:
                 if api_key_secrets is None:
-                    api_key_input = st.text_input("Enter :blue[**AssemblyAI**] API Key", value = '', help = '''to obtain an api key, register at [https://www.assemblyai.com/](https://www.assemblyai.com/). If run locally you can add \'api_key = \'xxxxxxxxxxx\' to your secrets.toml, for more info click [here](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management)''', label_visibility = 'visible')                                     
+                    api_key_input = st.text_input("""Enter :blue[**AssemblyAI**] API Key", value = '', help = '''to obtain an api key, register at [https://www.assemblyai.com/](https://www.assemblyai.com/).   
+                                                  If run locally you can add \'api_key = \'xxxxxxxxxxx\' to your secrets.toml, for more info click [here](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management)""",
+                                                  label_visibility = 'visible')                                     
                 else:
                     api_key_input = ''
                     
