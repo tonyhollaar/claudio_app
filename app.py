@@ -866,7 +866,8 @@ if menu_item == "Settings":
         selected_content_type = st.selectbox(
                             "Select Summarization Content Type",
                             options = content_types,
-                            key = key3_settings  # Default to the first option
+                            key = key3_settings,  # Default to the first option
+                            help='For more information, see [AssemblyAI Summarization Docs](https://www.assemblyai.com/docs/Models/summarization)'
                         )
                
 # =============================================================================
