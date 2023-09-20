@@ -434,6 +434,7 @@ if menu_item == 'Home':
                         # Display Emotion Analysis in right-side column
                         col3.write(f"{utterance_data['predicted_emoticon']}")
                 
+# locally code works but in cloud model too large >2 GB
 # =============================================================================
 #                 my_bar.progress(40, text = 'loading summarizer')
 #                 with st.expander('summary', expanded=True):
@@ -450,8 +451,27 @@ if menu_item == 'Home':
 #                     
 #                     # save to session state
 #                     set_state("CLAUDIO", ("summary", summary))                
-#                     st.write(summary[0]['summary_text'])     
+#                     st.write(summary[0]['summary_text'])   
 # =============================================================================
+                    
+                my_bar.progress(40, text = 'loading summarizer')
+                with st.expander('summary', expanded=True):
+                    config_summary = aai.TranscriptionConfig(
+                      summarization = True,
+                      summary_model = aai.SummarizationModel.informative,
+                      summary_type = aai.SummarizationType.bullets_verbose #bullets
+                    )
+                    
+                    transcriber_summary = aai.Transcriber()
+                    transcript = transcriber_summary.transcribe(
+                      FILE_URL,
+                      config=config
+                    )
+                    
+                    summary = transcript.summary
+                    # save to session state
+                    set_state("CLAUDIO", ("summary", summary))                
+                    st.write(summary[0]['summary_text'])   
                
                 my_bar.progress(60, text = 'loading named entity recognition...')
                 with st.expander('named entity recognition', expanded=True):
