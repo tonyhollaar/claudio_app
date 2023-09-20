@@ -434,22 +434,24 @@ if menu_item == 'Home':
                         # Display Emotion Analysis in right-side column
                         col3.write(f"{utterance_data['predicted_emoticon']}")
                 
-                my_bar.progress(40, text = 'loading summarizer')
-                with st.expander('summary', expanded=True):
-                    # Use whole_text variable with other model
-                    # source 1: https://www.youtube.com/watch?v=TsfLm5iiYb4
-                    # source 2: https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.SummarizationPipeline
-                    # Note: If no framework is specified, will default to the one currently installed. If no framework is specified and both frameworks are installed, will default to the framework of the model, or to PyTorch if no model is provided.
-                    summarizer = pipeline('summarization',  model="sshleifer/distilbart-cnn-12-6")
-                    #summary = summarizer(transcript_text, max_length=130, min_length=30, do_sample=False)
-                    summary = summarizer(transcript_text, 
-                                         max_length = get_state("SETTINGS", "summary_max_length"), 
-                                         min_length = get_state("SETTINGS", "summary_min_length"),
-                                         do_sample = False)
-                    
-                    # save to session state
-                    set_state("CLAUDIO", ("summary", summary))                
-                    st.write(summary[0]['summary_text'])     
+# =============================================================================
+#                 my_bar.progress(40, text = 'loading summarizer')
+#                 with st.expander('summary', expanded=True):
+#                     # Use whole_text variable with other model
+#                     # source 1: https://www.youtube.com/watch?v=TsfLm5iiYb4
+#                     # source 2: https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.SummarizationPipeline
+#                     # Note: If no framework is specified, will default to the one currently installed. If no framework is specified and both frameworks are installed, will default to the framework of the model, or to PyTorch if no model is provided.
+#                     summarizer = pipeline('summarization',  model="sshleifer/distilbart-cnn-12-6")
+#                     #summary = summarizer(transcript_text, max_length=130, min_length=30, do_sample=False)
+#                     summary = summarizer(transcript_text, 
+#                                          max_length = get_state("SETTINGS", "summary_max_length"), 
+#                                          min_length = get_state("SETTINGS", "summary_min_length"),
+#                                          do_sample = False)
+#                     
+#                     # save to session state
+#                     set_state("CLAUDIO", ("summary", summary))                
+#                     st.write(summary[0]['summary_text'])     
+# =============================================================================
                
                 my_bar.progress(60, text = 'loading named entity recognition...')
                 with st.expander('named entity recognition', expanded=True):
@@ -756,14 +758,16 @@ if menu_item == 'Home':
                  		# Display Emotion Analysis in right-side column
                  		col3.write(f"{utterance_data['predicted_emoticon']}")
             
-            # =============================================================================
-            # 2.SUMMARY
-            # =============================================================================
-            my_bar.progress(40, text = 'loading summary...')
-            
-            with st.expander('summary', expanded=True):
-                summary = get_state("CLAUDIO", "summary") # retrieve from session state the summary
-                st.write(summary[0]['summary_text']) # retrieve the text of summary             
+# =============================================================================
+#             # =============================================================================
+#             # 2.SUMMARY
+#             # =============================================================================
+#             my_bar.progress(40, text = 'loading summary...')
+#             
+#             with st.expander('summary', expanded=True):
+#                 summary = get_state("CLAUDIO", "summary") # retrieve from session state the summary
+#                 st.write(summary[0]['summary_text']) # retrieve the text of summary             
+# =============================================================================
             
             # =============================================================================
             # 3.NER - NAMED ENTITY RECOGNITION
