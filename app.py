@@ -471,7 +471,7 @@ if menu_item == 'Home':
                     summary = transcript.summary
                     # save to session state
                     set_state("CLAUDIO", ("summary", summary))                
-                    st.write(summary[0]['summary_text'])   
+                    st.write(summary)   
                
                 my_bar.progress(60, text = 'loading named entity recognition...')
                 with st.expander('named entity recognition', expanded=True):
