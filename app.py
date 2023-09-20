@@ -458,10 +458,26 @@ if menu_item == 'Home':
                     
                 my_bar.progress(40, text = 'loading summarizer')
                 with st.expander('summary', expanded=True):
+                    # Determine the summary_type based on user selection
+                    if get_state("SETTINGS", "summary_type") == "bullets":
+                        summary_type = aai.SummarizationType.bullets
+                    elif get_state("SETTINGS", "summary_type") == "bullets_verbose":
+                        summary_type = aai.SummarizationType.bullets_verbose
+                    elif get_state("SETTINGS", "summary_type") == "gist":
+                        summary_type = aai.SummarizationType.gist
+                    elif get_state("SETTINGS", "summary_type") == "headline":
+                        summary_type = aai.SummarizationType.headline
+                    elif get_state("SETTINGS", "summary_type") == "paragraph":
+                        summary_type = aai.SummarizationType.paragraph
+                    else:
+                        # Default to "bullets" if the selection is invalid
+                        summary_type = aai.SummarizationType.bullets
+                    
+                    # Create the TranscriptionConfig with the determined summary_type
                     config_summary = aai.TranscriptionConfig(
-                      summarization = True,
-                      summary_model = aai.SummarizationModel.informative,
-                      summary_type = aai.SummarizationType.bullets_verbose #bullets
+                        summarization=True,
+                        summary_model=aai.SummarizationModel.informative,
+                        summary_type=summary_type
                     )
                     
                     transcriber_summary = aai.Transcriber()
