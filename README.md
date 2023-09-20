@@ -1,6 +1,6 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Python: 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mystreamlitapp_name_here/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://claudio-app.streamlit.app/)
 # Claudio - Audio to Text Transcript Application
 
 ## Description
