@@ -463,15 +463,15 @@ if menu_item == 'Home':
                     )
                     
                     transcriber_summary = aai.Transcriber()
-                    transcript = transcriber_summary.transcribe(
+                    transcript_summary = transcriber_summary.transcribe(
                       FILE_URL,
-                      config=config
+                      config=config_summary
                     )
-                    print(transcript.summary)
+                    print(transcript_summary.summary)
                     
                     # save to session state
-                    set_state("CLAUDIO", ("summary", transcript.summary))                
-                    st.write(transcript.summary)   
+                    set_state("CLAUDIO", ("summary", transcript_summary.summary))                
+                    st.write(transcript_summary.summary)   
                
                 my_bar.progress(60, text = 'loading named entity recognition...')
                 with st.expander('named entity recognition', expanded=True):
