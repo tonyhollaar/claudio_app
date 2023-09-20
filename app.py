@@ -440,7 +440,7 @@ if menu_item == 'Home':
                     # source 1: https://www.youtube.com/watch?v=TsfLm5iiYb4
                     # source 2: https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.SummarizationPipeline
                     # Note: If no framework is specified, will default to the one currently installed. If no framework is specified and both frameworks are installed, will default to the framework of the model, or to PyTorch if no model is provided.
-                    summarizer = pipeline('summarization')
+                    summarizer = pipeline('summarization',  model="sshleifer/distilbart-cnn-12-6", revision="a4f8f3e")
                     #summary = summarizer(transcript_text, max_length=130, min_length=30, do_sample=False)
                     summary = summarizer(transcript_text, 
                                          max_length = get_state("SETTINGS", "summary_max_length"), 
