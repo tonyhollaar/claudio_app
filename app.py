@@ -361,7 +361,7 @@ if menu_item == 'Home':
                     # Emotion analysis                 
                     # =============================================================================
                     # Setup Pipeline with the Model for Emotion Analysis
-                    classifier = pipeline("text-classification", model="michellejieli/emotion_text_classifier",  framework="pt")
+                    classifier = pipeline("text-classification", model="michellejieli/emotion_text_classifier")
                     
                     # Map the emotion label to the corresponding emoticon
                     emoticons = {
