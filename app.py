@@ -68,6 +68,12 @@ key1_settings, key2_settings, key3_settings, key4_settings, key5_settings = crea
                                                                                         ("summary_type", "paragraph"),             #key3_settings
                                                                                         ("summary_max_length", 130),            #key4_settings
                                                                                         ("run", 0)])                            #key5_settings
+# API KEY session state
+key1_api_key, key2_api_key = create_store("API_KEY", [
+                                          ("input_api_key", ""),
+                                          ("run", 0)
+                                          ])
+
 # Set Boolean to check if new file is uploaded in Streamlit Widget
 new_file_loaded = False
 
@@ -195,9 +201,9 @@ if menu_item == 'Home':
             with col2:
                 if api_key_secrets is None:
                     api_key_input = st.text_input("Enter :blue[**AssemblyAI**] API Key", 
-                                                  value = '', 
+                                                  key = key1_api_key, 
                                                   help = '''to obtain an api key, register at [https://www.assemblyai.com/](https://www.assemblyai.com/).   
-                                                  If run locally you can add in lowercase \'api_key = \'xxxxxxxxxxx\' to your secrets.toml, for more info click [here](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management)''', 
+                                                  If run locally you can add in lowercase \'api_key = \'xxxxxxxxxxx\' to your secrets.toml, for more info click [here](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management).''', 
                                                   label_visibility = 'visible')                                     
                 else:
                     api_key_input = ''
@@ -229,6 +235,8 @@ if menu_item == 'Home':
                 
                 # FORM BUTTON
                 submit_button = st.form_submit_button(label="Start Transcript", 
+                                                      on_click=form_update, 
+                                                      args=('API_KEY',), 
                                                       use_container_width = True, 
                                                       type="primary")
     
@@ -905,7 +913,10 @@ if menu_item == "Settings":
         positive_threshold = st.slider("😃 Positive Threshold", min_value=-1.0, max_value=1.0, step=0.1, key = key1_settings)
         negative_threshold = st.slider("😞 Negative Threshold", min_value=-1.0, max_value=1.0, step=0.1, key = key2_settings)
         st.write("You can set custom values for the sentiment thresholds using the sliders above. When the sentiment score falls between these thresholds, the sentiment will be labeled as 😐 'neutral'.")
-        settings_submit_button = st.form_submit_button(label='Update Settings',  on_click=form_update, args=('SETTINGS',), use_container_width=True, type="primary")
+        settings_submit_button = st.form_submit_button(label='Update Settings',  
+                                                       on_click=form_update, 
+                                                       args=('SETTINGS',), 
+                                                       use_container_width=True, type="primary")
         
 if menu_item == "About":
     # FLIPCARD HTML+CSS IN STREAMLIT
