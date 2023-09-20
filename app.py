@@ -687,10 +687,10 @@ if menu_item == 'Home':
             vertical_spacer(1)
             
             # transcript = get_state("CLAUDIO", "whole_text")  # Replace with your transcript data
-            transcript_data  = get_state("CLAUDIO", "transcript")  # Replace with your transcript data
+            download_transcript_data  = get_state("CLAUDIO", "transcript")  # Replace with your transcript data
             # Create the transcript content as a string
             transcript_content = ""
-            for utterance_data in transcript_data:
+            for utterance_data in download_transcript_data:
                 transcript_content += f"{utterance_data['time']} - {utterance_data['speaker_name']}:\n"
                 transcript_content += f"{utterance_data['text']}\n"
                 transcript_content += f"Sentiment Score: {utterance_data['sentiment_score']}\n"
