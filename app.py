@@ -64,14 +64,14 @@ key1, key2, key3, key4, key5, key6, key7, key8, key9, key10, key11, key12 = crea
 key1_settings, key2_settings, key3_settings, key4_settings, key5_settings = create_store("SETTINGS", [
                                                                                         ("sentiment_positive_threshold", 0.5),  #key1_settings
                                                                                         ("sentiment_negative_threshold", -0.5), #key2_settings
-                                                                                        #("summary_min_length", 30),             #key3_settings
-                                                                                        ("summary_type", "paragraph"),             #key3_settings
+                                                                                        #("summary_min_length", 30),            #key3_settings
+                                                                                        ("summary_type", "paragraph"),          #key3_settings
                                                                                         ("summary_max_length", 130),            #key4_settings
                                                                                         ("run", 0)])                            #key5_settings
 # API KEY session state
 key1_api_key, key2_api_key = create_store("API_KEY", [
-                                          ("input_api_key", ""),
-                                          ("run", 0)
+                                          ("input_api_key", ""), #key1_api_key
+                                          ("run", 0)             #key2_api_key
                                           ])
 
 # Set Boolean to check if new file is uploaded in Streamlit Widget
@@ -99,7 +99,12 @@ def initiate_global_variables():
 
 def reset_session_states():
     for key in st.session_state.keys():
-        del st.session_state[key]
+        # exclude from deletion the api key entered by user so if next file is loaded it remembers the api key
+        if key == "__API_KEY-input_api_key__":
+            pass
+        else:
+            del st.session_state[key]
+        
     key1, key2, key3, key4, key5, key6, key7, key8, key9, key10, key11, key12  = initiate_global_variables()
 
 def read_file(filename):
