@@ -294,7 +294,7 @@ if menu_item == 'Home':
         
         if uploaded_file is None or len(uploaded_file) == 0:
             # show error image
-            st.image('https://github.com/tonyhollaar/claudio/blob/main/images/assemblyai_file_error.png?raw=true')
+            st.image('https://github.com/tonyhollaar/claudio_app/blob/main/images/assemblyai_file_error.png?raw=true')
         
         elif uploaded_file is not None and len(uploaded_file) > 0:
             progress_text = "Processing your Audio... Please wait!"
@@ -920,6 +920,6 @@ if menu_item == "Settings":
         
 if menu_item == "About":
     # FLIPCARD HTML+CSS IN STREAMLIT
-    image_url_front = 'https://raw.githubusercontent.com/tonyhollaar/claudio/main/images/assemblyai_about.png'
-    image_url_back = 'https://raw.githubusercontent.com/tonyhollaar/claudio/main/images/assemblyai_about_back.png'
+    image_url_front = 'https://raw.githubusercontent.com/tonyhollaar/claudio_app/main/images/assemblyai_about.png'
+    image_url_back = 'https://raw.githubusercontent.com/tonyhollaar/claudio_app/main/images/assemblyai_about_back.png'
     create_flipcard(image_path_front_card=image_url_front, image_path_back=image_url_back, font_size_back='16px')
