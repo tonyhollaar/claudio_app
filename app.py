@@ -491,17 +491,40 @@ if menu_item == 'Home':
                         # Default to "bullets" if the selection is invalid
                         summary_type = aai.SummarizationType.bullets
                     
-                    # Create the TranscriptionConfig with the determined summary_type
-                    config_summary = aai.TranscriptionConfig(
-                        summarization=True,
-                        summary_model=aai.SummarizationModel.informative,
-                        summary_type=summary_type
+# =============================================================================
+#                     # test again setting api key resolves issue if not loading summary
+#                     aai.settings.api_key = api_key
+#                     
+#                     # Create the TranscriptionConfig with the determined summary_type
+#                     config_summary = aai.TranscriptionConfig(
+#                         summarization=True,
+#                         summary_model=aai.SummarizationModel.informative,
+#                         summary_type=summary_type
+#                     )
+#                     
+#                     transcriber_summary = aai.Transcriber()
+#                     transcript_summary = transcriber_summary.transcribe(
+#                       FILE_URL,
+#                       config=config_summary
+#                     )
+#                     
+# =============================================================================
+                    # replace with your API token
+                    aai.settings.api_key = api_key
+                    
+                    # URL of the file to transcribe
+                    #FILE_URL = "https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3"
+                    
+                    config=aai.TranscriptionConfig(
+                      summarization=True,
+                      summary_model=aai.SummarizationModel.informative,
+                      summary_type=summary_type
                     )
                     
-                    transcriber_summary = aai.Transcriber()
-                    transcript_summary = transcriber_summary.transcribe(
+                    transcriber = aai.Transcriber()
+                    transcript_summary = transcriber.transcribe(
                       FILE_URL,
-                      config=config_summary
+                      config=config
                     )
                     
                     #print(transcript_summary.summary)
