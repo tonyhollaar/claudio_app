@@ -100,7 +100,7 @@ def initiate_global_variables():
 def reset_session_states():
     for key in st.session_state.keys():
         # exclude from deletion the api key entered by user so if next file is loaded it remembers the api key
-        if key == "__API_KEY-input_api_key__":
+        if key == "__API_KEY-input_api_key__" or key == "__API_KEY-run__":
             pass
         else:
             del st.session_state[key]
@@ -475,6 +475,7 @@ if menu_item == 'Home':
                     
                 my_bar.progress(40, text = 'loading summarizer')
                 with st.expander('summary', expanded=True):
+                    
                     # Determine the summary_type based on user selection
                     if get_state("SETTINGS", "summary_type") == "bullets":
                         summary_type = aai.SummarizationType.bullets
