@@ -54,13 +54,13 @@ key1, key2, key3, key4, key5, key6, key7, key8, key9, key10, key11, key12 = crea
                                                                                         ("treemap", None),            #key4
                                                                                         ("legend_html", None),        #key5
                                                                                         ("knowledge_graph", None),    #key6
-                                                                                        ("summary", ""),              #key7
+                                                                                        ("summary", None),            #key7
                                                                                         ("speaker_sentiments", None), #key8
                                                                                         ("transcript", ""),           #key9
                                                                                         ("whole_text", ""),           #key10
                                                                                         ("file_name", ""),            #key11
                                                                                         ("run", 0)])                  #key12
-# Initiate settings session states
+# Initiate Settings Session States
 key1_settings, key2_settings, key3_settings, key4_settings, key5_settings = create_store("SETTINGS", [
                                                                                         ("sentiment_positive_threshold", 0.5),  #key1_settings
                                                                                         ("sentiment_negative_threshold", -0.5), #key2_settings
@@ -68,7 +68,7 @@ key1_settings, key2_settings, key3_settings, key4_settings, key5_settings = crea
                                                                                         ("summary_type", "paragraph"),          #key3_settings
                                                                                         ("summary_max_length", 130),            #key4_settings
                                                                                         ("run", 0)])                            #key5_settings
-# API KEY session state
+# API KEY Session State
 key1_api_key, key2_api_key = create_store("API_KEY", [
                                           ("input_api_key", ""), #key1_api_key
                                           ("run", 0)             #key2_api_key
@@ -77,8 +77,74 @@ key1_api_key, key2_api_key = create_store("API_KEY", [
 # Set Boolean to check if new file is uploaded in Streamlit Widget
 new_file_loaded = False
 
+# Knowledge Graph Setup
+# Initialize spaCy for named entity recognition (NER)
+nlp = spacy.load('en_core_web_sm')
+
+# Create an empty knowledge graph using NetworkX
+knowledge_graph = nx.Graph()
+
 # =============================================================================
 # FUNCTIONS
+# =============================================================================
+def initialize_api_key():
+    api_key_input = st.session_state.get("__API_KEY-input_api_key__")
+    api_key_secrets = st.secrets.get("api_key")
+    
+    if api_key_input:
+        api_key = api_key_input
+        st.toast('Your API Key was used from the input!', icon='😍')
+    elif api_key_secrets:
+        api_key = api_key_secrets
+        st.toast('Your API Key was found in secrets.toml file!', icon='😍')
+    else:
+        st.warning('No API Key was provided. Please visit www.assemblyai.com to get one.')
+        api_key = None
+    
+    # Initialize AssemblyAI settings if an API key is available
+    if api_key:
+        aai.settings.api_key = api_key
+    return api_key
+
+# =============================================================================
+# Knowledge Graph Functions
+# =============================================================================
+# Define a function to extract entities and relationships from text
+def extract_entities_and_relationships(text):
+    doc = nlp(text)
+    entities = [ent.text for ent in doc.ents]
+    
+    # Extract relationships (you may need to define custom logic for this)
+    relationships = []
+    
+    return entities, relationships
+
+def visualize_graph(graph):
+    # Create a Plotly figure
+    fig = go.Figure()
+
+    # Extract node positions
+    pos = nx.spring_layout(graph)
+
+    # Create nodes
+    for node in graph.nodes():
+        x, y = pos[node]
+        fig.add_trace(go.Scatter(x=[x], y=[y], mode="markers+text", marker=dict(size=20), text=node, textposition="bottom center"))
+
+    # Create edges
+    for edge in graph.edges():
+        x0, y0 = pos[edge[0]]
+        x1, y1 = pos[edge[1]]
+        fig.add_trace(go.Scatter(x=[x0, x1], y=[y0, y1], mode="lines"))
+
+    # Set layout options
+    fig.update_layout(
+        showlegend=False,
+        hovermode="closest",
+        margin=dict(l=0, r=0, b=0, t=0))
+    
+    # Display the graph using Streamlit's `st.plotly_chart()` function
+    st.plotly_chart(fig, use_container_width=True)
 # =============================================================================
 def initiate_global_variables():
     # Initiate Session State Variables
@@ -89,7 +155,7 @@ def initiate_global_variables():
                                                                                             ("treemap", None),            #key4
                                                                                             ("legend_html", None),        #key5
                                                                                             ("knowledge_graph", None),    #key6
-                                                                                            ("summary", ""),              #key7
+                                                                                            ("summary", None),            #key7
                                                                                             ("speaker_sentiments", None), #key8
                                                                                             ("transcript", ""),           #key9
                                                                                             ("whole_text", ""),           #key10
@@ -136,7 +202,7 @@ def upload_audio_to_assemblyai(api_key, audio_file):
 # PAGE SETTINGS ("centered" or "wide" | "auto" or "expanded" or "collapsed")
 st.set_page_config(page_title = "claudio", layout = "centered", page_icon = "🎙️", initial_sidebar_state = "expanded") 
 
-# FONTS
+# SETUP DIFFERENT FONT STYLES
 st.markdown(font_style, unsafe_allow_html=True) 
 
 # =============================================================================
@@ -183,7 +249,6 @@ menu_item = option_menu(menu_title = None,
                                      },
                                  }
                          )
-        
 if menu_item == 'Home':
     # TITLE
     my_text_header('Claudio', my_font_size = '48px', my_font_family = 'Rock Salt')
@@ -202,25 +267,27 @@ if menu_item == 'Home':
                 my_text_header('Step 2:', my_font_size = '24px', my_font_family = 'Rock Salt') # Title 2
                 vertical_spacer(4)
                 my_text_header('Step 3:', my_font_size = '24px', my_font_family = 'Rock Salt') # Title 3
-            
             with col2:
+                
+                # If no api_key is found in the secrets.toml file or cloud secrets
                 if api_key_secrets is None:
+                    # Show widget for text input to user where ASSEMBLYAI API key can be entered
                     api_key_input = st.text_input("Enter :blue[**AssemblyAI**] API Key", 
                                                   key = key1_api_key, 
                                                   help = '''to obtain an api key, register at [https://www.assemblyai.com/](https://www.assemblyai.com/).   
                                                   if run locally you can add in lowercase \'api_key = \'xxxxxxxxxxx\' to your secrets.toml file, for more info click [here](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management).''', 
                                                   label_visibility = 'visible')                                     
                 else:
+                    # Show message to user, api key is found in secrets file / cloud
                     api_key_input = ''
-                    
                     vertical_spacer(2)
-                    
                     st.markdown("""
-                    <div style="background-color: #f5f5f5; border: 0px solid #cfcfcf; border-radius: 8px; padding: 6px; text-align: left;">
-                        &nbsp;&nbsp;&nbsp;<span style="color: #626262; font-size: 13px; font-family: 'Arial', sans-serif;">AssemblyAI API Key Found</span>
-                    </div>
-                    """, unsafe_allow_html=True)
+                                <div style="background-color: #f5f5f5; border: 0px solid #cfcfcf; border-radius: 8px; padding: 6px; text-align: left;">
+                                    &nbsp;&nbsp;&nbsp;<span style="color: #626262; font-size: 13px; font-family: 'Arial', sans-serif;">AssemblyAI API Key Found</span>
+                                </div>
+                                """, unsafe_allow_html=True)
                 
+                # Show widget for user to upload files
                 uploaded_file = st.file_uploader(label = 'Upload Audio File', 
                                                  label_visibility='visible', 
                                                  type = ["mp3"], 
@@ -230,118 +297,191 @@ if menu_item == 'Home':
 
                 # Custom CSS Styling for st.file_uploader / hide standard text to make widget smaller
                 hide_label = """
-                <style>
-                    .css-9ycgxx {
-                        display: none;
-                    }
-                </style>
-                """
+                            <style>
+                                .css-9ycgxx {
+                                    display: none;
+                                }
+                            </style>
+                            """
+                            
+                # Apply CSS Styling to widget
                 st.markdown(hide_label, unsafe_allow_html=True)
                 
-                # FORM BUTTON
+                # Form Submit Button to update the widgets (api_key if applicable, uploaded file)
                 submit_button = st.form_submit_button(label="Start Transcript", 
                                                       on_click=form_update, 
                                                       args=('API_KEY',), 
                                                       use_container_width = True, 
                                                       type="primary")
     
-    # =============================================================================
-    # Knowledge Graph    
-    # =============================================================================
-    # Initialize spaCy for named entity recognition (NER)
-    nlp = spacy.load('en_core_web_sm')
-    
-    # Create an empty knowledge graph using NetworkX
-    knowledge_graph = nx.Graph()
-    
-    # Define a function to extract entities and relationships from text
-    def extract_entities_and_relationships(text):
-        doc = nlp(text)
-        entities = [ent.text for ent in doc.ents]
-        
-        # Extract relationships (you may need to define custom logic for this)
-        relationships = []
-        
-        return entities, relationships
-    
-    def visualize_graph(graph):
-        # Create a Plotly figure
-        fig = go.Figure()
-    
-        # Extract node positions
-        pos = nx.spring_layout(graph)
-    
-        # Create nodes
-        for node in graph.nodes():
-            x, y = pos[node]
-            fig.add_trace(go.Scatter(x=[x], y=[y], mode="markers+text", marker=dict(size=20), text=node, textposition="bottom center"))
-    
-        # Create edges
-        for edge in graph.edges():
-            x0, y0 = pos[edge[0]]
-            x1, y1 = pos[edge[1]]
-            fig.add_trace(go.Scatter(x=[x0, x1], y=[y0, y1], mode="lines"))
-    
-        # Set layout options
-        fig.update_layout(
-            showlegend=False,
-            hovermode="closest",
-            margin=dict(l=0, r=0, b=0, t=0))
-        
-        # Display the graph using Streamlit's `st.plotly_chart()` function
-        st.plotly_chart(fig, use_container_width=True)
-        
+
     #******************************************************************************
     # AssemblyAI Package
     #******************************************************************************
-    # Process the form submission
-    if submit_button:
-        
-        if uploaded_file is None or len(uploaded_file) == 0:
-            # show error image
-            st.image('https://github.com/tonyhollaar/claudio_app/blob/main/images/assemblyai_file_error.png?raw=true')
-        
-        elif uploaded_file is not None and len(uploaded_file) > 0:
-            progress_text = "Processing your Audio... Please wait!"
+    try:
+        if uploaded_file[0].name != get_state("CLAUDIO", "file_name"):
+            new_file_loaded = True
+        else:
+            new_file_loaded = False
+    except:
+        pass
+    
+    # if user switches menu items, show last results if prior run
+    if new_file_loaded == False and all(get_state("CLAUDIO", state) is not None and (state != "transcript" or get_state("CLAUDIO", state) != "") for state in ["audio_data", "transcript", "summary", "treemap", "legend_html", "knowledge_graph", "speaker_sentiments"]):
+        try:
+            progress_text = "processing your audio... please wait!"
             my_bar = st.progress(0, text = progress_text)
             
-            if uploaded_file[0].name != get_state("CLAUDIO", "file_name"):
-                reset_session_states()
-                new_file_loaded = True
+            # =============================================================================
+            # PLAY AUDIO             
+            # =============================================================================
+            st.audio(get_state("CLAUDIO", "audio_data"), format="audio/mp3")
+            
+            # =============================================================================
+            # 1.TRANSCRIPT            
+            # =============================================================================
+            my_bar.progress(20, text = 'creating transcript...')
+            
+            # If transcript exists in session state, retrieve it
+            transcript_data = get_state("CLAUDIO", "transcript")
+         
+            # Display the transcript data outside the loop
+            with st.expander('transcript', expanded=True):
+                 	for utterance_data in transcript_data:
+                 		# Create two columns
+                 		col1, col2, col3 = st.columns([2, 8, 2])
+                 
+                 		# Display the time in the left time column
+                 		col1.write(utterance_data["time"])
+                 
+                 		# Display the transcript (colored text) in the middle column
+                 		colored_text = color_text_by_sentiment(utterance_data["text"], utterance_data["sentiment_score"])
+                 		col2.write(f"<b>{utterance_data['speaker_name']}:</b> {colored_text}", unsafe_allow_html=True)
+                 
+                 		# Display Emotion Analysis in right-side column
+                 		col3.write(f"{utterance_data['predicted_emoticon']}")
+            
+            # =============================================================================
+            # 2.SUMMARY
+            # =============================================================================
+            my_bar.progress(40, text = 'loading summary...')
+            
+            with st.expander('summary', expanded=True):
+                summary = get_state("CLAUDIO", "summary") # retrieve from session state the summary
+                st.write(summary) # retrieve the text of summary      
+                          
+            # =============================================================================
+            # 3.NER - NAMED ENTITY RECOGNITION
+            # =============================================================================
+            my_bar.progress(60, text = 'loading named entity recognition...')
+            
+            with st.expander('named entity recognition', expanded=True):
+                fig = get_state("CLAUDIO", "treemap")
+                st.plotly_chart(fig, use_container_width=True)     
+                legend_html = get_state("CLAUDIO", "legend_html")
+                my_text_paragraph("LEGEND", my_font_size="14px", my_text_align="left")
+                st.markdown(legend_html, unsafe_allow_html=True)    
+                
+            # =============================================================================
+            # 4.Knowledge Graph                
+            # =============================================================================
+            my_bar.progress(80, text = 'loading knowledge graph...')
+            
+            with st.expander('knowledge graph', expanded=True): 
+                knowledge_graph = get_state("CLAUDIO", "knowledge_graph")
+                visualize_graph(knowledge_graph)
+                
+            # =============================================================================
+            # 5.Speaker Sentiment                
+            # =============================================================================
+            my_bar.progress(99, text = 'loading sentiment analysis...')
+            
+            with st.expander('sentiment analysis', expanded=True):
+                # retrieve sentiments from session state
+                speaker_sentiments = get_state("CLAUDIO", "speaker_sentiments")
+                
+                # Get for each speaker the Average Sentiment Score
+                # Define thresholds for sentiment scores
+                positive_threshold = get_state("SETTINGS", "sentiment_positive_threshold")
+                negative_threshold = get_state("SETTINGS", "sentiment_negative_threshold")
+    
+                # Define sentiment-to-emoticon mapping
+                sentiment_emoticons = {
+                    "positive": "😃",
+                    "neutral": "😐",
+                    "negative": "😞"}
+    
+                for speaker, sentiment_scores in speaker_sentiments.items():
+                    # Calculate Average Sentiment Score based on chunks of text
+                    average_sentiment = sum(sentiment_scores) / len(sentiment_scores)
+                    
+                    # Determine the sentiment label based on the threshold
+                    if average_sentiment >= positive_threshold:
+                        sentiment_label = "positive"
+                    elif average_sentiment <= negative_threshold:
+                        sentiment_label = "negative"
+                    else:
+                        sentiment_label = "neutral"
+                    
+                    # Get the Emoticon for the Sentiment Label
+                    sentiment_emoticon = sentiment_emoticons[sentiment_label]
+                    
+                    # Show Average Sentiment Score(s) in Streamlit with Emoticon
+                    st.write(f"{speaker} Average Sentiment: **{sentiment_label.capitalize()}** {sentiment_emoticon} ({average_sentiment:.2f})")
+            my_bar.progress(100, text = '"All systems ready!"')
+            my_bar.empty()
+        except:
+            pass
+     
+    # if submit button for user form is pressed, continue with code below
+    elif submit_button and new_file_loaded == False:
+        pass
+    elif submit_button and new_file_loaded == True:
+        # if no file is uploaded by user, show message to user indicating to upload a file
+        if uploaded_file is None or len(uploaded_file) == 0:
+            # Show ERROR IMAGE to user
+            st.image('https://github.com/tonyhollaar/claudio_app/blob/main/images/assemblyai_file_error.png?raw=true')
+        # if a file is uploaded continue code
+        elif uploaded_file is not None and len(uploaded_file) > 0:
+            # PROGRESS BAR
+            progress_text = "Processing your Audio... Please wait!"
+            my_bar = st.progress(0, text = progress_text)
+
+            # IF a e.g. second / 'new' file is uploaded with different name reset session states and set boolean to True for new_file_loaded, ELSE pass
+            if new_file_loaded == True:
+                reset_session_states()    
+# =============================================================================
+#             if uploaded_file[0].name != get_state("CLAUDIO", "file_name") and get_state("CLAUDIO", "file_name") != "":
+#                 reset_session_states()
+#                 new_file_loaded = True
+# =============================================================================
                 
             # =============================================================================
             # AUDIO PLAYBACK CODE
             # =============================================================================
-            # Read and save the uploaded audio data
-            audio_data = uploaded_file[0].read() # uploaded_file[0].read()
+            # Read the uploaded audio data
+            audio_data = uploaded_file[0].read()
+            # Save the uploaded audio data
             save_audio_data(audio_data)
-    
             # Display the audio data if available
             audio_data = get_audio_data()
-            set_state("CLAUDIO", ("audio_data", audio_data)) # SAVE TO SESSION STATE
             
-            my_bar.progress(20, text = 'creating transcript...')
-            
+            # SAVE AUDIO_DATA TO SESSION STATE
+            set_state("CLAUDIO", ("audio_data", audio_data)) 
+
             if audio_data is not None:
                 st.audio(audio_data, format="audio/mp3")
-
+                
+                api_key = initialize_api_key()       
+            
+                # show progress bar with message indicating start of next process 
+                my_bar.progress(20, text = 'creating transcript...')
+                
                 # =============================================================================
                 # API KEY -> Check if the user has provided an API key through the form
                 # =============================================================================
-                if api_key_input:
-                    api_key = api_key_input
-                    st.toast('Your API Key was used from the input!', icon='😍')
-                elif api_key_secrets:
-                    api_key = api_key_secrets
-                    st.toast('Your API Key was found in secrets.toml file!', icon='😍')
-                else:
-                    st.warning('No API Key was provided. Please visit www.assemblyai.com to get one.')
-                
-                # Initialize AssemblyAI settings
-                if api_key:
-                    aai.settings.api_key = api_key
-                else:
-                    st.stop()    
+                # Call this function to initialize the API key and get its value
+                aai.settings.api_key = initialize_api_key()
 
                 # =============================================================================
                 # AUDIO_URL
@@ -355,7 +495,6 @@ if menu_item == 'Home':
                     set_state("CLAUDIO", ("audio_url", audio_url)) # Store the audio URL in session state
 
                 FILE_URL = audio_url
-                #FILE_URL = "https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3" # TEST AUDIO MP3
                 
                 # Quick message on bottom-right of screen
                 st.toast("Transcription in progress... please wait!")
@@ -433,7 +572,7 @@ if menu_item == 'Home':
                 else:
                     # If transcript exists in session state, retrieve it
                     transcript_data = get_state("CLAUDIO", "transcript")
-
+                    
                 # Transcript Text (whole text)
                 transcript_text = "\n".join(utterance_data["text"] for utterance_data in transcript_data)
 
@@ -453,6 +592,48 @@ if menu_item == 'Home':
                         # Display Emotion Analysis in right-side column
                         col3.write(f"{utterance_data['predicted_emoticon']}")
                 
+                # =============================================================================
+                # Creating Summary
+                # =============================================================================
+                my_bar.progress(40, text = 'loading summarizer')
+                with st.expander('summary', expanded=True):
+                    
+ 
+                    
+                    # Determine the summary_type based on user selection
+                    if get_state("SETTINGS", "summary_type") == "bullets":
+                        summary_type = aai.SummarizationType.bullets
+                    elif get_state("SETTINGS", "summary_type") == "bullets_verbose":
+                        summary_type = aai.SummarizationType.bullets_verbose
+                    elif get_state("SETTINGS", "summary_type") == "gist":
+                        summary_type = aai.SummarizationType.gist
+                    elif get_state("SETTINGS", "summary_type") == "headline":
+                        summary_type = aai.SummarizationType.headline
+                    elif get_state("SETTINGS", "summary_type") == "paragraph":
+                        summary_type = aai.SummarizationType.paragraph
+                    else:
+                        # Default to "bullets" if the selection is invalid
+                        summary_type = aai.SummarizationType.bullets
+                    
+                    # replace with your API token
+                    aai.settings.api_key = api_key
+    
+                    config = aai.TranscriptionConfig(summarization = True,
+                                                     summary_model = aai.SummarizationModel.informative,
+                                                     summary_type = summary_type)
+                                                    
+                    transcriber = aai.Transcriber()
+                    
+                    FILE_URL = upload_audio_to_assemblyai(api_key, audio_data)
+    
+                    transcript_summary = transcriber.transcribe(FILE_URL,
+                                                                config=config)
+                    
+                    # save to session state
+                    set_state("CLAUDIO", ("summary", transcript_summary.summary)) 
+                    # show in streamlit the summary
+                    st.write(transcript_summary.summary)               
+                    
 # locally code works but in cloud model too large >2 GB
 # =============================================================================
 #                 my_bar.progress(40, text = 'loading summarizer')
@@ -472,67 +653,7 @@ if menu_item == 'Home':
 #                     set_state("CLAUDIO", ("summary", summary))                
 #                     st.write(summary[0]['summary_text'])   
 # =============================================================================
-                    
-                my_bar.progress(40, text = 'loading summarizer')
-                with st.expander('summary', expanded=True):
-                    
-                    # Determine the summary_type based on user selection
-                    if get_state("SETTINGS", "summary_type") == "bullets":
-                        summary_type = aai.SummarizationType.bullets
-                    elif get_state("SETTINGS", "summary_type") == "bullets_verbose":
-                        summary_type = aai.SummarizationType.bullets_verbose
-                    elif get_state("SETTINGS", "summary_type") == "gist":
-                        summary_type = aai.SummarizationType.gist
-                    elif get_state("SETTINGS", "summary_type") == "headline":
-                        summary_type = aai.SummarizationType.headline
-                    elif get_state("SETTINGS", "summary_type") == "paragraph":
-                        summary_type = aai.SummarizationType.paragraph
-                    else:
-                        # Default to "bullets" if the selection is invalid
-                        summary_type = aai.SummarizationType.bullets
-                    
-# =============================================================================
-#                     # test again setting api key resolves issue if not loading summary
-#                     aai.settings.api_key = api_key
-#                     
-#                     # Create the TranscriptionConfig with the determined summary_type
-#                     config_summary = aai.TranscriptionConfig(
-#                         summarization=True,
-#                         summary_model=aai.SummarizationModel.informative,
-#                         summary_type=summary_type
-#                     )
-#                     
-#                     transcriber_summary = aai.Transcriber()
-#                     transcript_summary = transcriber_summary.transcribe(
-#                       FILE_URL,
-#                       config=config_summary
-#                     )
-#                     
-# =============================================================================
-                    # replace with your API token
-                    aai.settings.api_key = api_key
-                    
-                    # URL of the file to transcribe
-                    #FILE_URL = "https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3"
-                    
-                    config=aai.TranscriptionConfig(
-                      summarization=True,
-                      summary_model=aai.SummarizationModel.informative,
-                      summary_type=summary_type
-                    )
-                    
-                    transcriber = aai.Transcriber()
-                    transcript_summary = transcriber.transcribe(
-                      FILE_URL,
-                      config=config
-                    )
-                    
-                    #print(transcript_summary.summary)
-                    
-                    # save to session state
-                    set_state("CLAUDIO", ("summary", transcript_summary.summary))                
-                    st.write(transcript_summary.summary)   
-               
+
                 my_bar.progress(60, text = 'loading named entity recognition...')
                 with st.expander('named entity recognition', expanded=True):
                     # Load the English language model - source: https://spacy.io/models/en#en_core_web_sm
@@ -615,22 +736,19 @@ if menu_item == 'Home':
                                             "WORK_OF_ART": "#dbdb8d"    # Light Olive
                                         }
                     
-                    # Create a custom color scale based on the entity_type_colors dictionary
-                    #color_scale = [entity_type_colors.get(entity_type, "gray") for entity_type in unique_entity_types]
-                    
                     # Create a categorical column for entity types
                     df_sorted['Entity Type'] = pd.Categorical(df_sorted['Entity Type'], categories=unique_entity_types)
                     
                     # Create a treemap using Plotly Express with the categorical color scale
                     fig = px.treemap(
-                        df_sorted,
-                        path=["Entity Type", "Entity"],
-                        values="Count",
-                        labels={"Entity Type": "Entity Type"},
-                        color="Entity Type",  # Use the categorical column for color
-                        color_discrete_map = entity_type_colors,  # Specify colors using the entity_type_colors dictionary
-                    )
-                    
+                                        data_frame = df_sorted,
+                                        path = ["Entity Type", "Entity"],
+                                        values = "Count",
+                                        labels = {"Entity Type": "Entity Type"},
+                                        color = "Entity Type",  # Use the categorical column for color
+                                        color_discrete_map = entity_type_colors,  # Specify colors using the entity_type_colors dictionary
+                                    )
+                                    
                     # Adjust the margin to reduce the bottom margin
                     fig.update_layout(margin=dict(t=0, b=10, l=0, r=0))
                     
@@ -660,7 +778,6 @@ if menu_item == 'Home':
                     # Display the legend-like HTML
                     my_text_paragraph("LEGEND", my_font_size="14px", my_text_align="left")
                     st.markdown(legend_html, unsafe_allow_html=True)                    
-
 
                 with st.expander('knowledge graph', expanded=True): 
                     # =============================================================================
@@ -731,6 +848,10 @@ if menu_item == 'Home':
                         
                 my_bar.progress(100, text = '"All systems ready!"')
                 my_bar.empty()
+
+        else:
+            pass
+            #st.warning('no file is uploaded!')
     with st.sidebar:
         
         vertical_spacer(1)
@@ -744,10 +865,10 @@ if menu_item == 'Home':
                 user_question = st.text_input("Type your question here:", value="Type your question here about the transcript...", label_visibility='collapsed')
             with col2:
                 # Add a submit button to the form
-                submit_button = st.form_submit_button("❓")
+                question_submit_button = st.form_submit_button("❓")
         
             # Check if the form is submitted (button is clicked)
-            if submit_button:
+            if question_submit_button:
                 # Initialize the question answering pipeline
                 oracle = pipeline(model="deepset/roberta-base-squad2")
             
@@ -778,8 +899,6 @@ if menu_item == 'Home':
                 transcript_content += f"Sentiment Score: {utterance_data['sentiment_score']}\n"
                 transcript_content += f"Predicted Emoticon: {utterance_data['predicted_emoticon']}\n\n"
 
-            
-            
             # Create a timestamp with the current date and time
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             
@@ -796,117 +915,7 @@ if menu_item == 'Home':
         
         # get the file name 
         try:
-            #st.write('test filename', uploaded_file[0].name)
             set_state("CLAUDIO", ("file_name", uploaded_file[0].name))
-        except:
-            pass
-
-    # =============================================================================
-    # With Q&A question by user -> reload the main page again
-    # =============================================================================
-    if submit_button:
-        try:
-            progress_text = "processing your audio... please wait!"
-            my_bar = st.progress(0, text = progress_text)
-            
-            # =============================================================================
-            # PLAY AUDIO            
-            # =============================================================================
-            st.audio(get_state("CLAUDIO", "audio_data"), format="audio/mp3")
-            
-            # =============================================================================
-            # 1.TRANSCRIPT            
-            # =============================================================================
-            my_bar.progress(20, text = 'creating transcript...')
-            
-            # If transcript exists in session state, retrieve it
-            transcript_data = get_state("CLAUDIO", "transcript")
-         
-            # Display the transcript data outside the loop
-            with st.expander('transcript', expanded=True):
-                 	for utterance_data in transcript_data:
-                 		# Create two columns
-                 		col1, col2, col3 = st.columns([2, 8, 2])
-                 
-                 		# Display the time in the left time column
-                 		col1.write(utterance_data["time"])
-                 
-                 		# Display the transcript (colored text) in the middle column
-                 		colored_text = color_text_by_sentiment(utterance_data["text"], utterance_data["sentiment_score"])
-                 		col2.write(f"<b>{utterance_data['speaker_name']}:</b> {colored_text}", unsafe_allow_html=True)
-                 
-                 		# Display Emotion Analysis in right-side column
-                 		col3.write(f"{utterance_data['predicted_emoticon']}")
-            
-            # =============================================================================
-            # 2.SUMMARY
-            # =============================================================================
-            my_bar.progress(40, text = 'loading summary...')
-            
-            with st.expander('summary', expanded=True):
-                summary = get_state("CLAUDIO", "summary") # retrieve from session state the summary
-                st.write(summary) # retrieve the text of summary      
-                          
-            # =============================================================================
-            # 3.NER - NAMED ENTITY RECOGNITION
-            # =============================================================================
-            my_bar.progress(60, text = 'loading named entity recognition...')
-            
-            with st.expander('named entity recognition', expanded=True):
-                fig = get_state("CLAUDIO", "treemap")
-                st.plotly_chart(fig, use_container_width=True)     
-                legend_html = get_state("CLAUDIO", "legend_html")
-                my_text_paragraph("LEGEND", my_font_size="14px", my_text_align="left")
-                st.markdown(legend_html, unsafe_allow_html=True)    
-                
-            # =============================================================================
-            # 4.Knowledge Graph                
-            # =============================================================================
-            my_bar.progress(80, text = 'loading knowledge graph...')
-            
-            with st.expander('knowledge graph', expanded=True): 
-                knowledge_graph = get_state("CLAUDIO", "knowledge_graph")
-                visualize_graph(knowledge_graph)
-                
-            # =============================================================================
-            # 5.Speaker Sentiment                
-            # =============================================================================
-            my_bar.progress(99, text = 'loading sentiment analysis...')
-            
-            with st.expander('sentiment analysis', expanded=True):
-                # retrieve sentiments from session state
-                speaker_sentiments = get_state("CLAUDIO", "speaker_sentiments")
-                
-                # Get for each speaker the Average Sentiment Score
-                # Define thresholds for sentiment scores
-                positive_threshold = get_state("SETTINGS", "sentiment_positive_threshold")
-                negative_threshold = get_state("SETTINGS", "sentiment_negative_threshold")
-
-                # Define sentiment-to-emoticon mapping
-                sentiment_emoticons = {
-                    "positive": "😃",
-                    "neutral": "😐",
-                    "negative": "😞"}
-
-                for speaker, sentiment_scores in speaker_sentiments.items():
-                    # Calculate Average Sentiment Score based on chunks of text
-                    average_sentiment = sum(sentiment_scores) / len(sentiment_scores)
-                    
-                    # Determine the sentiment label based on the threshold
-                    if average_sentiment >= positive_threshold:
-                        sentiment_label = "positive"
-                    elif average_sentiment <= negative_threshold:
-                        sentiment_label = "negative"
-                    else:
-                        sentiment_label = "neutral"
-                    
-                    # Get the Emoticon for the Sentiment Label
-                    sentiment_emoticon = sentiment_emoticons[sentiment_label]
-                    
-                    # Show Average Sentiment Score(s) in Streamlit with Emoticon
-                    st.write(f"{speaker} Average Sentiment: **{sentiment_label.capitalize()}** {sentiment_emoticon} ({average_sentiment:.2f})")
-            my_bar.progress(100, text = '"All systems ready!"')
-            my_bar.empty()
         except:
             pass
 
@@ -914,6 +923,7 @@ if menu_item == "Settings":
     with st.form('settings'):
         
         show_lottie_animation(url="./images/settings.json", key="settings", height=200, width=200, speed = 1, loop=True, quality='high', col_sizes = [4,4,4]) 
+        
         # =============================================================================
         # Summarizer        
         # =============================================================================
@@ -927,12 +937,6 @@ if menu_item == "Settings":
                             help='for more information, see [AssemblyAI Summarization Docs](https://www.assemblyai.com/docs/Models/summarization)'
                         )
                
-# =============================================================================
-#         input_value1 = st.number_input("Minimum Token Length", min_value=1, step=1, key = key3_settings, help = "This parameter specifies the minimum number of tokens required in the generated summary. It ensures that the generated summary is not too short. If the summary is shorter than this length, the summarizer might generate additional content to meet the minimum length requirement.")
-#         input_value2 = st.number_input("Maximum Token Length", min_value=2, step=1, key = key4_settings, help = "This parameter specifies the maximum number of tokens (words or subwords, depending on the tokenizer) allowed in the generated summary. If the summary generated by the summarizer exceeds this length, it will be truncated or shortened to meet the specified maximum length.")
-#         
-# =============================================================================
-
         # =============================================================================
         # Sentiment Analysis
         # =============================================================================
@@ -943,10 +947,10 @@ if menu_item == "Settings":
         negative_threshold = st.slider("😞 Negative Threshold", min_value=-1.0, max_value=1.0, step=0.1, key = key2_settings)
         st.write("You can set custom values for the sentiment thresholds using the sliders above. When the sentiment score falls between these thresholds, the sentiment will be labeled as 😐 'neutral'.")
         settings_submit_button = st.form_submit_button(label='Update Settings',  
-                                                       on_click=form_update, 
-                                                       args=('SETTINGS',), 
-                                                       use_container_width=True, type="primary")
-        
+                                                       on_click = form_update, 
+                                                       args = ('SETTINGS',), 
+                                                       use_container_width = True, 
+                                                       type = "primary")     
 if menu_item == "About":
     # FLIPCARD HTML+CSS IN STREAMLIT
     image_url_front = 'https://raw.githubusercontent.com/tonyhollaar/claudio_app/main/images/assemblyai_about.png'
