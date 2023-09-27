@@ -2,7 +2,9 @@
 ![Python: 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://claudio-app.streamlit.app/)
 # Claudio - Audio to Text Transcript Application
-![claudio_youtube_thumbnail](https://github.com/tonyhollaar/claudio_app/assets/121459374/73cedcfc-5f39-4b12-84cc-b0527bd53f68)
+
+https://github.com/tonyhollaar/claudio_app/assets/121459374/73cedcfc-5f39-4b12-84cc-b0527bd53f68
+
 ## Description
 Claudio is a user-friendly application for converting audio files to text transcripts. It is hosted using Streamlit and relies on the AssemblyAI API for audio transcription. Claudio provides additional functionalities, including text summarization, question and answer text corpus, and sentiment analysis.
 
