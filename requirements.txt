@@ -9,9 +9,8 @@ pydub
 plotly
 reportlab
 pandas
-numpy>=1.21.0  # Ensure a recent version of numpy
+numpy>=1.21.0
 spacy==3.4.0
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.0/en_core_web_sm-3.4.0-py3-none-any.whl
 networkx
-torch>=1.6.0,<2.0.0  # Ensure compatibility with spacy and numpy
-thinc==8.1.0  # Pin to a compatible version with spacy
+torch>=1.6.0,<2.0.0
